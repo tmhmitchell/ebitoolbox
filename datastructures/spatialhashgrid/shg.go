@@ -4,7 +4,6 @@
 package spatialhashgrid
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/tmhmitchell/ebitoolbox/datastructures/vector"
@@ -37,16 +36,19 @@ func New() *SpatialHashGrid {
 
 func (shg SpatialHashGrid) Length() int { return len(shg.buckets) }
 
+// bounds returns the minimum (inclusive) and maximum (exclusive) bounds of the
+// buckets a Client would be entered into, in the order x0, y0, x1, y1.
+func bounds(c Client) (float64, float64, float64, float64) {
+	return math.Floor(c.X()), math.Floor(c.Y()),
+		math.Ceil(c.X() + c.Width()), math.Ceil(c.Y() + c.Height())
+
+}
+
 func (shg *SpatialHashGrid) Insert(c Client) {
-	// Our buckets are integer-aligned, so we need to truncate the client's
-	// x/y positions to determine the first bucket they'll be entered into.
-	tx := math.Trunc(c.X())
-	ty := math.Trunc(c.Y())
+	x0, y0, x1, y1 := bounds(c)
 
-	fmt.Println(math.Floor(c.X()), math.Ceil(c.X()+c.Width()))
-
-	for y := ty; y < ty+c.Height(); y++ {
-		for x := tx; x < tx+c.Width(); x++ {
+	for y := y0; y < y1; y++ {
+		for x := x0; x < x1; x++ {
 			bk := vector.NewVec2(x, y)
 
 			// XXX: This allocates a new array if there isn't one available,
@@ -58,13 +60,10 @@ func (shg *SpatialHashGrid) Insert(c Client) {
 }
 
 func (shg *SpatialHashGrid) Remove(c Client) {
-	// Our grid buckets are integer-aligned, so we need to truncate the client's
-	// x/y positions to determine the first bucket they'll be entered into.
-	tx := math.Trunc(c.X())
-	ty := math.Trunc(c.Y())
+	x0, y0, x1, y1 := bounds(c)
 
-	for y := ty; y < ty+c.Height(); y++ {
-		for x := tx; x < tx+c.Width(); x++ {
+	for y := y0; y < y1; y++ {
+		for x := x0; x < x1; x++ {
 			bk := vector.NewVec2(x, y)
 
 			// No point iterating over a non-existant bucket
@@ -100,8 +99,8 @@ func (shg *SpatialHashGrid) Remove(c Client) {
 
 // ClientsIn returns an array of all the clients inside a given rectangle
 func (shg SpatialHashGrid) ClientsIn(x0, y0, x1, y1 float64) []Client {
-
-	cs := make([]Client, 0)
+	// We use a map as a set to ensure a client isn't returned multiple times
+	cs := make(map[Client]struct{})
 
 	for y := y0; y < y1; y++ {
 		for x := x0; x < x1; x++ {
@@ -113,9 +112,19 @@ func (shg SpatialHashGrid) ClientsIn(x0, y0, x1, y1 float64) []Client {
 				continue
 			}
 
-			cs = append(cs, bucket...)
+			for _, c := range bucket {
+				cs[c] = struct{}{}
+			}
 		}
 	}
 
-	return cs
+	// Convert our "set" into an array
+	csa := make([]Client, len(cs))
+	i := 0
+	for c := range cs {
+		csa[i] = c
+		i++
+	}
+
+	return csa
 }

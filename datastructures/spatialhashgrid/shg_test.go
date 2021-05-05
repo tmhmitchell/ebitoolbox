@@ -14,14 +14,23 @@ func (te TestEntity) Width() float64  { return te.w }
 func (te TestEntity) Height() float64 { return te.h }
 
 func TestInsert(t *testing.T) {
-	grid := spatialhashgrid.New()
-	c := TestEntity{0.5, 0.5, 2, 2}
+	tt := []struct {
+		client          spatialhashgrid.Client
+		expectedBuckets int
+	}{
+		{TestEntity{0, 0, 1, 1}, 1},
+		{TestEntity{0.5, 0.5, 1, 1}, 4},
+	}
 
-	grid.Insert(c)
+	for _, item := range tt {
+		grid := spatialhashgrid.New()
 
-	if grid.Length() != 4 {
-		t.Logf("Expected 4 buckets, found %d\n", grid.Length())
-		t.FailNow()
+		grid.Insert(item.client)
+
+		if grid.Length() != item.expectedBuckets {
+			t.Logf("Expected %d buckets, found %d\n", item.expectedBuckets, grid.Length())
+			t.FailNow()
+		}
 	}
 }
 
@@ -58,15 +67,24 @@ func TestInsertAndRemove(t *testing.T) {
 }
 
 func TestClientsIn(t *testing.T) {
-	grid := spatialhashgrid.New()
-	c := TestEntity{1, 1, 1, 1}
 
-	grid.Insert(c)
+	tt := []struct {
+		client          spatialhashgrid.Client
+		expectedClients int
+	}{
+		{TestEntity{1, 1, 1, 1}, 1},
+		{TestEntity{0.5, 0.5, 1, 1}, 1},
+	}
 
-	retrieved := grid.ClientsIn(0, 0, 2, 2)
+	for _, item := range tt {
+		grid := spatialhashgrid.New()
+		grid.Insert(item.client)
 
-	if len(retrieved) != 1 {
-		t.Logf("Expected 1 client, found %d\n", len(retrieved))
-		t.FailNow()
+		retrieved := grid.ClientsIn(0, 0, 2, 2)
+
+		if len(retrieved) != item.expectedClients {
+			t.Logf("Expected %d client, found %d\n", item.expectedClients, len(retrieved))
+			t.FailNow()
+		}
 	}
 }
