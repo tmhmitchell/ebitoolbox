@@ -34,6 +34,22 @@ func TestInsert(t *testing.T) {
 	}
 }
 
+func TestDisjointRemove(t *testing.T) {
+	// Edge case where removing a client would remove 1-elem buckets containing !client
+	c0 := TestEntity{0, 0, 1, 1}
+	c1 := TestEntity{0.5, 0.5, 1, 1}
+
+	grid := spatialhashgrid.New()
+
+	grid.Insert(c0)
+	grid.Remove(c1)
+
+	if grid.Length() != 1 {
+		t.Logf("Expected 1 buckets, found %d\n", grid.Length())
+		t.FailNow()
+	}
+}
+
 func TestInsertAndRemove(t *testing.T) {
 	grid := spatialhashgrid.New()
 	c0 := TestEntity{1, 1, 1, 1}

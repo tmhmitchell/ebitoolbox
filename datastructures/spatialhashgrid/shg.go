@@ -72,6 +72,18 @@ func (shg *SpatialHashGrid) Remove(c Client) {
 				continue
 			}
 
+			// If the client we're removing isn't in the bucket, skip it
+			present := false
+			for _, bc := range bucket {
+				if bc == c {
+					present = true
+					break
+				}
+			}
+			if !present {
+				continue
+			}
+
 			// If the bucket only has a single element, delete it to prevent empty
 			// buckets being left behind. This might not be the best approach?
 			if len(bucket) == 1 {
