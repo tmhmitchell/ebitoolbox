@@ -50,8 +50,8 @@ func NewCamera(w, h, baseSpriteSize float64) *Camera {
 
 // SetTarget determines the point in world-space that the camera is centered one
 func (c *Camera) SetTarget(x, y float64) {
-	c.viewport.SetX(x)
-	c.viewport.SetY(y)
+	c.target.SetX(x)
+	c.target.SetY(y)
 }
 
 // WorldToScreenGeoM returns a transformation matrix for changing world-space
