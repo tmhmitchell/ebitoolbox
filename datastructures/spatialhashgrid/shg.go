@@ -4,6 +4,7 @@
 package spatialhashgrid
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/tmhmitchell/ebitoolbox/datastructures/vector"
@@ -41,6 +42,8 @@ func (shg *SpatialHashGrid) Insert(c Client) {
 	// x/y positions to determine the first bucket they'll be entered into.
 	tx := math.Trunc(c.X())
 	ty := math.Trunc(c.Y())
+
+	fmt.Println(math.Floor(c.X()), math.Ceil(c.X()+c.Width()))
 
 	for y := ty; y < ty+c.Height(); y++ {
 		for x := tx; x < tx+c.Width(); x++ {

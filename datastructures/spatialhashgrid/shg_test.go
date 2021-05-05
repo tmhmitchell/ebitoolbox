@@ -13,6 +13,18 @@ func (te TestEntity) Y() float64      { return te.y }
 func (te TestEntity) Width() float64  { return te.w }
 func (te TestEntity) Height() float64 { return te.h }
 
+func TestInsert(t *testing.T) {
+	grid := spatialhashgrid.New()
+	c := TestEntity{0.5, 0.5, 2, 2}
+
+	grid.Insert(c)
+
+	if grid.Length() != 4 {
+		t.Logf("Expected 4 buckets, found %d\n", grid.Length())
+		t.FailNow()
+	}
+}
+
 func TestInsertAndRemove(t *testing.T) {
 	grid := spatialhashgrid.New()
 	c0 := TestEntity{1, 1, 1, 1}
