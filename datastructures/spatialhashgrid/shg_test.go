@@ -69,21 +69,43 @@ func TestInsertAndRemove(t *testing.T) {
 func TestClientsIn(t *testing.T) {
 
 	tt := []struct {
-		client          spatialhashgrid.Client
+		clients         []spatialhashgrid.Client
+		x0, y0, x1, y1  float64
 		expectedClients int
 	}{
-		{TestEntity{1, 1, 1, 1}, 1},
-		{TestEntity{0.5, 0.5, 1, 1}, 1},
+		{
+			[]spatialhashgrid.Client{TestEntity{1, 1, 1, 1}},
+			0, 0, 2, 2,
+			1,
+		},
+		{
+			[]spatialhashgrid.Client{TestEntity{0.5, 0.5, 1, 1}},
+			0, 0, 2, 2,
+			1,
+		},
+		// Ensure that non-integer boundaries are correctly adjusted
+		{
+			[]spatialhashgrid.Client{TestEntity{2, 2, 1, 1}},
+			1.5, 1.5, 3.5, 3.5,
+			1,
+		},
 	}
 
-	for _, item := range tt {
+	for _, ti := range tt {
 		grid := spatialhashgrid.New()
-		grid.Insert(item.client)
 
-		retrieved := grid.ClientsIn(0, 0, 2, 2)
+		for _, c := range ti.clients {
+			grid.Insert(c)
+		}
 
-		if len(retrieved) != item.expectedClients {
-			t.Logf("Expected %d client, found %d\n", item.expectedClients, len(retrieved))
+		retrieved := grid.ClientsIn(ti.x0, ti.y0, ti.x1, ti.y1)
+
+		if len(retrieved) != ti.expectedClients {
+			t.Logf(
+				"Expected %d client, found %d\n",
+				ti.expectedClients,
+				len(retrieved),
+			)
 			t.FailNow()
 		}
 	}
