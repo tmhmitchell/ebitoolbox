@@ -36,16 +36,19 @@ func New() *SpatialHashGrid {
 
 func (shg SpatialHashGrid) Length() int { return len(shg.buckets) }
 
-// bounds returns the minimum (inclusive) and maximum (exclusive) bounds of the
-// buckets a Client would be entered into, in the order x0, y0, x1, y1.
-func bounds(c Client) (float64, float64, float64, float64) {
-	return math.Floor(c.X()), math.Floor(c.Y()),
-		math.Ceil(c.X() + c.Width()), math.Ceil(c.Y() + c.Height())
+// clientBounds returns the minimum (inclusive) and maximum (exclusive)
+// bounds of the buckets a Client would be entered into, in the order
+// x0, y0, x1, y1.
+func clientBounds(c Client) (float64, float64, float64, float64) {
+	return bounds(c.X(), c.Y(), c.X()+c.Width(), c.Y()+c.Height())
+}
 
+func bounds(x0, y0, x1, y1 float64) (float64, float64, float64, float64) {
+	return math.Floor(x0), math.Floor(y0), math.Ceil(x1), math.Ceil(y1)
 }
 
 func (shg *SpatialHashGrid) Insert(c Client) {
-	x0, y0, x1, y1 := bounds(c)
+	x0, y0, x1, y1 := clientBounds(c)
 
 	for y := y0; y < y1; y++ {
 		for x := x0; x < x1; x++ {
@@ -60,7 +63,7 @@ func (shg *SpatialHashGrid) Insert(c Client) {
 }
 
 func (shg *SpatialHashGrid) Remove(c Client) {
-	x0, y0, x1, y1 := bounds(c)
+	x0, y0, x1, y1 := clientBounds(c)
 
 	for y := y0; y < y1; y++ {
 		for x := x0; x < x1; x++ {
@@ -111,11 +114,13 @@ func (shg *SpatialHashGrid) Remove(c Client) {
 
 // ClientsIn returns an array of all the clients inside a given rectangle
 func (shg SpatialHashGrid) ClientsIn(x0, y0, x1, y1 float64) []Client {
+	cx0, cy0, cx1, cy1 := bounds(x0, y0, x1, y1)
+
 	// We use a map as a set to ensure a client isn't returned multiple times
 	cs := make(map[Client]struct{})
 
-	for y := y0; y < y1; y++ {
-		for x := x0; x < x1; x++ {
+	for y := cy0; y < cy1; y++ {
+		for x := cx0; x < cx1; x++ {
 			bk := vector.NewVec2(x, y)
 
 			// No point iterating over a non-existant bucket
