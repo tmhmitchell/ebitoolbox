@@ -28,7 +28,7 @@ type Camera struct {
 	// viewport represents the width and height of the what the camera displays
 	viewport vector.Vec2
 
-	// target represents what the camera is centered on
+	// target represents what the camera is centered on, in world space
 	target vector.Vec2
 
 	// zoom represents the amount drawn sprites are scaled by
@@ -48,7 +48,10 @@ func NewCamera(w, h, baseSpriteSize float64) *Camera {
 	}
 }
 
-// SetTarget determines the point in world-space that the camera is centered one
+// Target returns the camera's target attribute
+func (c Camera) Target() vector.Vec2 { return c.target }
+
+// SetTarget sets the x and y components of the camera's target attribute
 func (c *Camera) SetTarget(x, y float64) {
 	c.target.SetX(x)
 	c.target.SetY(y)
