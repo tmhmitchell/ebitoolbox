@@ -35,6 +35,7 @@ type Camera struct {
 	zoom float64
 
 	// baseSpriteSize is the minimum length of the X and Y axis of your game's sprites
+	// If your world space is measured in pixels, set this to 1!
 	baseSpriteSize float64
 }
 
@@ -56,6 +57,12 @@ func (c *Camera) SetTarget(x, y float64) {
 	c.target.SetX(x)
 	c.target.SetY(y)
 }
+
+// Zoom returns the camera's zoom attribute
+func (c Camera) Zoom() float64 { return c.zoom }
+
+// SetZoom sets the camera's zoom attribute
+func (c *Camera) SetZoom(z float64) { c.zoom = z }
 
 // WorldToScreenGeoM returns a transformation matrix for changing world-space
 // coordinates to screen-space coordinates.
